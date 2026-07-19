@@ -61,10 +61,14 @@ export default function VerifyAndCTA() {
   return (
     <>
       {/* Certificate verification */}
-      <section className="bg-slate-950 py-24">
-        <div className="mx-auto max-w-5xl px-6">
+      <section className="relative overflow-hidden bg-slate-950 py-24">
+        <div className="pointer-events-none absolute inset-0">
+        <div className="v-drift-a absolute left-[10%] top-0 h-72 w-72 rounded-full bg-emerald-500/20 blur-[90px]" />
+<div className="v-drift-b absolute right-[8%] bottom-0 h-64 w-64 rounded-full bg-blue-600/20 blur-[90px]" />
+        </div>
+        <div className="relative mx-auto max-w-5xl px-6">
           <div className="relative overflow-hidden rounded-3xl border border-emerald-500/20 bg-gradient-to-br from-emerald-500/[0.06] via-slate-900 to-slate-900 p-10 sm:p-14">
-            <div className="pointer-events-none absolute -right-16 -top-16 h-64 w-64 rounded-full bg-emerald-500/10 blur-[100px]" />
+            <div className="v-pulse pointer-events-none absolute -right-16 -top-16 h-64 w-64 rounded-full bg-emerald-500/10 blur-[100px]" />
 
             <div className="relative flex flex-col items-start gap-8 sm:flex-row sm:items-center sm:justify-between">
               <div className="max-w-xl">
@@ -94,8 +98,12 @@ export default function VerifyAndCTA() {
       </section>
 
       {/* Technologies */}
-      <section className="bg-black py-24">
-        <div className="mx-auto max-w-7xl px-6">
+      <section className="relative overflow-hidden bg-black py-24">
+        <div className="pointer-events-none absolute inset-0">
+          <div className="v-drift-b absolute left-1/2 top-[-6rem] h-[26rem] w-[26rem] -translate-x-1/2 rounded-full bg-blue-600/10 blur-[130px]" />
+          <div className="v-drift-a absolute right-[-4rem] bottom-[-4rem] h-64 w-64 rounded-full bg-sky-500/10 blur-[110px]" />
+        </div>
+        <div className="relative mx-auto max-w-7xl px-6">
           <div className="mx-auto max-w-2xl text-center">
             <span className="text-xs font-semibold uppercase tracking-widest text-blue-500">
               Our Stack
@@ -121,14 +129,15 @@ export default function VerifyAndCTA() {
         <div className="mx-auto max-w-6xl">
           <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-700 via-blue-600 to-sky-600 p-10 sm:p-16">
             <div
-              className="pointer-events-none absolute inset-0 opacity-20"
+              className="v-grid-pan pointer-events-none absolute inset-0 opacity-20"
               style={{
                 backgroundImage:
                   "linear-gradient(to right, #ffffff 1px, transparent 1px), linear-gradient(to bottom, #ffffff 1px, transparent 1px)",
                 backgroundSize: "40px 40px",
               }}
             />
-            <div className="pointer-events-none absolute -left-10 -top-10 h-56 w-56 rounded-full bg-white/10 blur-[90px]" />
+            <div className="v-drift-a pointer-events-none absolute -left-10 -top-10 h-56 w-56 rounded-full bg-white/10 blur-[90px]" />
+            <div className="v-drift-b pointer-events-none absolute -bottom-12 -right-12 h-56 w-56 rounded-full bg-white/10 blur-[90px]" />
 
             <div className="relative mx-auto max-w-2xl text-center">
               <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
@@ -159,6 +168,35 @@ export default function VerifyAndCTA() {
           </div>
         </div>
       </section>
+
+      <style>{`
+        @keyframes vDriftA {
+          0%, 100% { transform: translate(0px, 0px) scale(1); }
+          50% { transform: translate(24px, -16px) scale(1.08); }
+        }
+        @keyframes vDriftB {
+          0%, 100% { transform: translate(0px, 0px) scale(1); }
+          50% { transform: translate(-20px, 18px) scale(1.06); }
+        }
+        .v-drift-a { animation: vDriftA 13s ease-in-out infinite; }
+        .v-drift-b { animation: vDriftB 15s ease-in-out infinite; }
+
+        @keyframes vPulse {
+          0%, 100% { opacity: 0.7; transform: scale(1); }
+          50% { opacity: 1; transform: scale(1.12); }
+        }
+        .v-pulse { animation: vPulse 6s ease-in-out infinite; }
+
+        @keyframes vGridPan {
+          from { background-position: 0px 0px; }
+          to { background-position: 40px 40px; }
+        }
+        .v-grid-pan { animation: vGridPan 16s linear infinite; }
+
+        @media (prefers-reduced-motion: reduce) {
+          .v-drift-a, .v-drift-b, .v-pulse, .v-grid-pan { animation: none !important; }
+        }
+      `}</style>
     </>
   );
 }

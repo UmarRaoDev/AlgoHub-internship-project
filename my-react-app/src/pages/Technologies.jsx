@@ -1,3 +1,25 @@
+import { useEffect, useRef, useState } from "react";
+
+function useInView(options = { threshold: 0.15 }) {
+  const ref = useRef(null);
+  const [inView, setInView] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        setInView(true);
+        observer.disconnect();
+      }
+    }, options);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  return [ref, inView];
+}
+
 const CATEGORIES = [
   {
     name: "Backend & API Integration",
@@ -47,8 +69,18 @@ export default function Technologies() {
   return (
     <main className="bg-slate-950">
       {/* Hero */}
-      <section className="border-b border-white/10 px-6 py-20 sm:py-28">
-        <div className="mx-auto max-w-3xl text-center">
+      <section className="relative overflow-hidden border-b border-white/10 px-6 py-20 sm:py-28">
+        <div className="pointer-events-none absolute inset-0">
+          <div
+            className="tc-drift-a absolute left-[8%] top-[-6rem] h-[26rem] w-[26rem] rounded-full blur-3xl"
+            style={{ background: "radial-gradient(circle, rgba(37,99,235,0.35) 0%, rgba(37,99,235,0) 70%)" }}
+          />
+          <div
+            className="tc-drift-b absolute right-[6%] bottom-[-6rem] h-[22rem] w-[22rem] rounded-full blur-3xl"
+            style={{ background: "radial-gradient(circle, rgba(14,165,233,0.32) 0%, rgba(14,165,233,0) 70%)" }}
+          />
+        </div>
+        <div className="tc-fade-up relative mx-auto max-w-3xl text-center">
           <p className="text-xs font-semibold uppercase tracking-wider text-blue-500">
             Our Technologies
           </p>
@@ -63,53 +95,132 @@ export default function Technologies() {
       </section>
 
       {/* Categories */}
-      <section className="px-6 py-20 sm:py-24">
-        <div className="mx-auto grid max-w-6xl gap-6 lg:grid-cols-2">
-          {CATEGORIES.map(({ name, icon: Icon, badgeClass, hoverClass, items }) => (
-            <div
+      <section className="relative overflow-hidden px-6 py-20 sm:py-24">
+        <div className="pointer-events-none absolute inset-0">
+          <div
+            className="tc-drift-b absolute left-1/2 top-[-4rem] h-[26rem] w-[26rem] -translate-x-1/2 rounded-full blur-3xl"
+            style={{ background: "radial-gradient(circle, rgba(37,99,235,0.25) 0%, rgba(37,99,235,0) 70%)" }}
+          />
+        </div>
+        <div className="relative mx-auto grid max-w-6xl gap-6 lg:grid-cols-2">
+          {CATEGORIES.map(({ name, icon: Icon, badgeClass, hoverClass, items }, i) => (
+            <CategoryCard
               key={name}
-              className="rounded-2xl border border-white/10 bg-slate-900 p-8 transition-colors hover:border-blue-600/40"
-            >
-              <div className="flex items-center gap-3">
-                <div className={`flex h-11 w-11 items-center justify-center rounded-lg border ${badgeClass}`}>
-                  <Icon className="h-5 w-5" />
-                </div>
-                <h2 className="text-lg font-semibold text-white">{name}</h2>
-              </div>
-
-              <div className="mt-6 flex flex-wrap gap-2.5">
-                {items.map((tech) => (
-                  <span
-                    key={tech}
-                    className={`rounded-lg border border-white/10 bg-slate-950 px-4 py-2 text-sm font-medium text-slate-300 transition-colors hover:text-white ${hoverClass}`}
-                  >
-                    {tech}
-                  </span>
-                ))}
-              </div>
-            </div>
+              name={name}
+              Icon={Icon}
+              badgeClass={badgeClass}
+              hoverClass={hoverClass}
+              items={items}
+              index={i}
+            />
           ))}
         </div>
       </section>
 
       {/* CTA */}
-      <section className="px-6 pb-20 sm:pb-24">
-        <div className="mx-auto max-w-3xl rounded-2xl border border-white/10 bg-slate-900 p-10 text-center sm:p-14">
-          <h2 className="text-2xl font-bold text-white sm:text-3xl">
-            Not sure which stack fits your project?
-          </h2>
-          <p className="mt-3 text-sm text-slate-400 sm:text-base">
-            We'll help you pick the right technologies based on your goals, scale, and budget.
-          </p>
-          <a
-            href="/contact"
-            className="mt-6 inline-block rounded-lg bg-blue-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-blue-500"
-          >
-            Talk to Our Team
-          </a>
+      <section className="relative overflow-hidden px-6 pb-20 sm:pb-24">
+        <div className="pointer-events-none absolute inset-0">
+          <div
+            className="tc-drift-a absolute left-1/2 top-0 h-[26rem] w-[26rem] -translate-x-1/2 rounded-full blur-3xl"
+            style={{ background: "radial-gradient(circle, rgba(37,99,235,0.3) 0%, rgba(37,99,235,0) 70%)" }}
+          />
         </div>
+        <TechCta />
       </section>
+
+      <TechnologiesStyles />
     </main>
+  );
+}
+
+function CategoryCard({ name, Icon, badgeClass, hoverClass, items, index }) {
+  const [ref, inView] = useInView({ threshold: 0.15 });
+  return (
+    <div
+      ref={ref}
+      style={{ transitionDelay: inView ? `${index * 80}ms` : "0ms" }}
+      className={`tc-fade-up-scroll rounded-2xl border border-white/10 bg-slate-900 p-8 transition-colors hover:border-blue-600/40 ${
+        inView ? "tc-in" : ""
+      }`}
+    >
+      <div className="flex items-center gap-3">
+        <div className={`flex h-11 w-11 items-center justify-center rounded-lg border ${badgeClass}`}>
+          <Icon className="h-5 w-5" />
+        </div>
+        <h2 className="text-lg font-semibold text-white">{name}</h2>
+      </div>
+
+      <div className="mt-6 flex flex-wrap gap-2.5">
+        {items.map((tech) => (
+          <span
+            key={tech}
+            className={`rounded-lg border border-white/10 bg-slate-950 px-4 py-2 text-sm font-medium text-slate-300 transition-colors hover:text-white ${hoverClass}`}
+          >
+            {tech}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function TechCta() {
+  const [ref, inView] = useInView({ threshold: 0.2 });
+  return (
+    <div
+      ref={ref}
+      className={`tc-fade-up-scroll relative mx-auto max-w-3xl rounded-2xl border border-white/10 bg-slate-900 p-10 text-center sm:p-14 ${
+        inView ? "tc-in" : ""
+      }`}
+    >
+      <h2 className="text-2xl font-bold text-white sm:text-3xl">
+        Not sure which stack fits your project?
+      </h2>
+      <p className="mt-3 text-sm text-slate-400 sm:text-base">
+        We'll help you pick the right technologies based on your goals, scale, and budget.
+      </p>
+      <a
+        href="/contact"
+        className="mt-6 inline-block rounded-lg bg-blue-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-blue-500"
+      >
+        Talk to Our Team
+      </a>
+    </div>
+  );
+}
+
+function TechnologiesStyles() {
+  return (
+    <style>{`
+      @keyframes tcFadeUp {
+        from { opacity: 0; transform: translateY(18px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      .tc-fade-up { animation: tcFadeUp 0.7s ease-out both; }
+
+      .tc-fade-up-scroll { opacity: 0; transform: translateY(18px); transition: opacity 0.6s ease-out, transform 0.6s ease-out; }
+      .tc-fade-up-scroll.tc-in { opacity: 1; transform: translateY(0); }
+
+      @keyframes tcDriftA {
+        0%, 100% { transform: translate(0px, 0px) scale(1); }
+        50% { transform: translate(24px, -18px) scale(1.08); }
+      }
+      @keyframes tcDriftB {
+        0%, 100% { transform: translate(0px, 0px) scale(1); }
+        50% { transform: translate(-20px, 16px) scale(1.06); }
+      }
+      .tc-drift-a { animation: tcDriftA 13s ease-in-out infinite; }
+      .tc-drift-b { animation: tcDriftB 15s ease-in-out infinite; }
+
+      @media (prefers-reduced-motion: reduce) {
+        .tc-fade-up, .tc-fade-up-scroll, .tc-drift-a, .tc-drift-b {
+          animation: none !important;
+          transition: none !important;
+          opacity: 1 !important;
+          transform: none !important;
+        }
+      }
+    `}</style>
   );
 }
 

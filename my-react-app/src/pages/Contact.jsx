@@ -1,4 +1,25 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+
+function useInView(options = { threshold: 0.15 }) {
+  const ref = useRef(null);
+  const [inView, setInView] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        setInView(true);
+        observer.disconnect();
+      }
+    }, options);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  return [ref, inView];
+}
+
 
 const WHATSAPP_LINK = "https://wa.me/message/ZOMUVFYRNUSBN1";
 
@@ -49,8 +70,18 @@ export default function Contact() {
   return (
     <main className="bg-slate-950">
       {/* Hero */}
-      <section className="border-b border-white/10 px-6 py-20 sm:py-28">
-        <div className="mx-auto max-w-3xl text-center">
+      <section className="relative overflow-hidden border-b border-white/10 px-6 py-20 sm:py-28">
+        <div className="pointer-events-none absolute inset-0">
+          <div
+            className="c-drift-a absolute left-[8%] top-[-6rem] h-[26rem] w-[26rem] rounded-full blur-3xl"
+            style={{ background: "radial-gradient(circle, rgba(37,99,235,0.35) 0%, rgba(37,99,235,0) 70%)" }}
+          />
+          <div
+            className="c-drift-b absolute right-[6%] bottom-[-6rem] h-[22rem] w-[22rem] rounded-full blur-3xl"
+            style={{ background: "radial-gradient(circle, rgba(14,165,233,0.32) 0%, rgba(14,165,233,0) 70%)" }}
+          />
+        </div>
+        <div className="c-fade-up relative mx-auto max-w-3xl text-center">
           <p className="text-xs font-semibold uppercase tracking-wider text-blue-500">
             Get In Touch
           </p>
@@ -65,113 +96,182 @@ export default function Contact() {
       </section>
 
       {/* Form + details */}
-      <section className="px-6 py-20 sm:py-24">
-        <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[1.3fr_1fr]">
+      <section className="relative overflow-hidden px-6 py-20 sm:py-24">
+        <div className="pointer-events-none absolute inset-0">
+          <div
+            className="c-drift-a absolute left-1/2 top-[-4rem] h-[28rem] w-[28rem] -translate-x-1/2 rounded-full blur-3xl"
+            style={{ background: "radial-gradient(circle, rgba(37,99,235,0.3) 0%, rgba(37,99,235,0) 70%)" }}
+          />
+        </div>
+        <div className="relative mx-auto grid max-w-6xl gap-10 lg:grid-cols-[1.3fr_1fr]">
           {/* Form */}
-          <form
-            onSubmit={handleSubmit}
-            className="rounded-2xl border border-white/10 bg-slate-900 p-8 sm:p-10"
-          >
-            <div className="grid gap-6 sm:grid-cols-2">
-              <Field
-                label="Full Name"
-                name="name"
-                value={form.name}
-                onChange={handleChange}
-                placeholder="Ali Ahmed"
-                required
-              />
-              <Field
-                label="Email Address"
-                name="email"
-                type="email"
-                value={form.email}
-                onChange={handleChange}
-                placeholder="ali@company.com"
-                required
-              />
-            </div>
-
-            <div className="mt-6">
-              <Field
-                label="Subject"
-                name="subject"
-                value={form.subject}
-                onChange={handleChange}
-                placeholder="Project inquiry"
-                required
-              />
-            </div>
-
-            <div className="mt-6">
-              <label htmlFor="message" className="text-sm font-medium text-slate-300">
-                Message
-              </label>
-              <textarea
-                id="message"
-                name="message"
-                value={form.message}
-                onChange={handleChange}
-                rows={5}
-                required
-                placeholder="Tell us a bit about what you need..."
-                className="mt-2 w-full rounded-lg border border-white/10 bg-slate-950 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600"
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={status === "submitting"}
-              className="mt-8 w-full rounded-lg bg-blue-600 py-3 text-sm font-semibold text-white transition-colors hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:px-8"
-            >
-              {status === "submitting" ? "Sending..." : "Send Message"}
-            </button>
-
-            {status === "success" && (
-              <p className="mt-4 text-sm text-emerald-400">
-                Thanks — your message has been sent. We'll be in touch soon.
-              </p>
-            )}
-            {status === "error" && (
-              <p className="mt-4 text-sm text-red-400">
-                Something went wrong. Please try again or email us directly.
-              </p>
-            )}
-          </form>
+          <ContactForm
+            form={form}
+            status={status}
+            handleChange={handleChange}
+            handleSubmit={handleSubmit}
+          />
 
           {/* Contact details */}
-          <div className="flex flex-col gap-4">
-            {CONTACT_DETAILS.map(({ label, value, href, external, icon: Icon }) => (
-              <div
-                key={label}
-                className="flex items-start gap-4 rounded-2xl border border-white/10 bg-slate-900 p-6"
-              >
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-600/15">
-                  <Icon className="h-5 w-5 text-blue-500" />
-                </div>
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-                    {label}
-                  </p>
-                  {href ? (
-                    <a
-                      href={href}
-                      target={external ? "_blank" : undefined}
-                      rel={external ? "noopener noreferrer" : undefined}
-                      className="mt-1 block text-sm text-slate-200 transition-colors hover:text-white"
-                    >
-                      {value}
-                    </a>
-                  ) : (
-                    <p className="mt-1 text-sm text-slate-200">{value}</p>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
+          <ContactDetails />
         </div>
       </section>
+      <ContactStyles />
     </main>
+  );
+}
+
+function ContactForm({ form, status, handleChange, handleSubmit }) {
+  const [ref, inView] = useInView({ threshold: 0.1 });
+
+  return (
+    <form
+      ref={ref}
+      onSubmit={handleSubmit}
+      className={`c-slide-left rounded-2xl border border-white/10 bg-slate-900 p-8 sm:p-10 ${
+        inView ? "c-in" : ""
+      }`}
+    >
+      <div className="grid gap-6 sm:grid-cols-2">
+        <Field
+          label="Full Name"
+          name="name"
+          value={form.name}
+          onChange={handleChange}
+          placeholder="Ali Ahmed"
+          required
+        />
+        <Field
+          label="Email Address"
+          name="email"
+          type="email"
+          value={form.email}
+          onChange={handleChange}
+          placeholder="ali@company.com"
+          required
+        />
+      </div>
+
+      <div className="mt-6">
+        <Field
+          label="Subject"
+          name="subject"
+          value={form.subject}
+          onChange={handleChange}
+          placeholder="Project inquiry"
+          required
+        />
+      </div>
+
+      <div className="mt-6">
+        <label htmlFor="message" className="text-sm font-medium text-slate-300">
+          Message
+        </label>
+        <textarea
+          id="message"
+          name="message"
+          value={form.message}
+          onChange={handleChange}
+          rows={5}
+          required
+          placeholder="Tell us a bit about what you need..."
+          className="mt-2 w-full rounded-lg border border-white/10 bg-slate-950 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600"
+        />
+      </div>
+
+      <button
+        type="submit"
+        disabled={status === "submitting"}
+        className="mt-8 w-full rounded-lg bg-blue-600 py-3 text-sm font-semibold text-white transition-colors hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:px-8"
+      >
+        {status === "submitting" ? "Sending..." : "Send Message"}
+      </button>
+
+      {status === "success" && (
+        <p className="c-fade-up mt-4 text-sm text-emerald-400">
+          Thanks — your message has been sent. We'll be in touch soon.
+        </p>
+      )}
+      {status === "error" && (
+        <p className="c-fade-up mt-4 text-sm text-red-400">
+          Something went wrong. Please try again or email us directly.
+        </p>
+      )}
+    </form>
+  );
+}
+
+function ContactDetails() {
+  const [ref, inView] = useInView({ threshold: 0.1 });
+
+  return (
+    <div ref={ref} className={`c-slide-right flex flex-col gap-4 ${inView ? "c-in" : ""}`}>
+      {CONTACT_DETAILS.map(({ label, value, href, external, icon: Icon }) => (
+        <div
+          key={label}
+          className="flex items-start gap-4 rounded-2xl border border-white/10 bg-slate-900 p-6"
+        >
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-600/15">
+            <Icon className="h-5 w-5 text-blue-500" />
+          </div>
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+              {label}
+            </p>
+            {href ? (
+              <a
+                href={href}
+                target={external ? "_blank" : undefined}
+                rel={external ? "noopener noreferrer" : undefined}
+                className="mt-1 block text-sm text-slate-200 transition-colors hover:text-white"
+              >
+                {value}
+              </a>
+            ) : (
+              <p className="mt-1 text-sm text-slate-200">{value}</p>
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function ContactStyles() {
+  return (
+    <style>{`
+      @keyframes cFadeUp {
+        from { opacity: 0; transform: translateY(18px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      .c-fade-up { animation: cFadeUp 0.7s ease-out both; }
+
+      .c-slide-left { opacity: 0; transform: translateX(-32px); transition: opacity 0.65s ease-out, transform 0.65s ease-out; }
+      .c-slide-left.c-in { opacity: 1; transform: translateX(0); }
+
+      .c-slide-right { opacity: 0; transform: translateX(32px); transition: opacity 0.65s ease-out, transform 0.65s ease-out; }
+      .c-slide-right.c-in { opacity: 1; transform: translateX(0); }
+
+      @keyframes cDriftA {
+        0%, 100% { transform: translate(0px, 0px) scale(1); }
+        50% { transform: translate(24px, -18px) scale(1.08); }
+      }
+      @keyframes cDriftB {
+        0%, 100% { transform: translate(0px, 0px) scale(1); }
+        50% { transform: translate(-20px, 16px) scale(1.06); }
+      }
+      .c-drift-a { animation: cDriftA 13s ease-in-out infinite; }
+      .c-drift-b { animation: cDriftB 15s ease-in-out infinite; }
+
+      @media (prefers-reduced-motion: reduce) {
+        .c-fade-up, .c-slide-left, .c-slide-right, .c-drift-a, .c-drift-b {
+          animation: none !important;
+          transition: none !important;
+          opacity: 1 !important;
+          transform: none !important;
+        }
+      }
+    `}</style>
   );
 }
 

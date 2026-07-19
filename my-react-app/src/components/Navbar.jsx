@@ -3,7 +3,7 @@ import logo from "../assets/logo.png";
 import { Link } from "react-router-dom";
 
 const NAV_LINKS = [
-  { label: "Hero", href: "/" },
+  { label: "Home", href: "/" },
   {
     label: "Company",
     href: "#",
@@ -173,6 +173,7 @@ export default function Navbar() {
                           <li key={child.label}>
                             <Link
                               to={child.href}
+                              onClick={() => setMobileOpen(false)}
                               className="block py-2 text-sm text-slate-400 transition-colors duration-200 hover:text-white"
                             >
                               {child.label}
@@ -185,6 +186,7 @@ export default function Navbar() {
                 ) : (
                   <Link
                     to={link.href}
+                    onClick={() => setMobileOpen(false)}
                     className="block py-3 text-sm font-medium text-slate-300 transition-colors duration-200 hover:text-white"
                   >
                     {link.label}
@@ -199,6 +201,7 @@ export default function Navbar() {
               href={WHATSAPP_LINK}
               target="_blank"
               rel="noopener noreferrer"
+              onClick={() => setMobileOpen(false)}
               className="flex items-center justify-center gap-2 rounded-lg border border-white/10 py-2.5 text-sm font-medium text-slate-300 transition-all duration-200 hover:border-white/20 hover:bg-white/5 active:scale-95"
             >
               <WhatsAppIcon className="h-4 w-4" />
@@ -206,6 +209,7 @@ export default function Navbar() {
             </a>
             <Link
               to="/contact"
+              onClick={() => setMobileOpen(false)}
               className="rounded-lg bg-blue-600 py-2.5 text-center text-sm font-semibold text-white transition-all duration-200 hover:bg-blue-500 active:scale-95"
             >
               Get a Quote

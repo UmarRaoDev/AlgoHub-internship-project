@@ -8,11 +8,22 @@ import FAQ from "./pages/Faq";
 import Contact from "./pages/Contact";
 import Portfolio from "./pages/Portfolio";
 import Team from "./pages/Team";
-import { BrowserRouter,Route,Routes } 
+import { BrowserRouter,Route,Routes,useLocation } 
 
 from "react-router-dom";
+import { useEffect } from "react";
 import Technologies from "./pages/Technologies";
 import Internship from "./pages/Internship";
+
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
+}
 
 
 function App() {
@@ -20,6 +31,7 @@ function App() {
     <>
     
     <BrowserRouter>
+    <ScrollToTop/>
     <Navbar/>
     
     <Routes>

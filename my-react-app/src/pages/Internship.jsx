@@ -1,3 +1,25 @@
+import { useEffect, useRef, useState } from "react";
+
+function useInView(options = { threshold: 0.15 }) {
+  const ref = useRef(null);
+  const [inView, setInView] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        setInView(true);
+        observer.disconnect();
+      }
+    }, options);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  return [ref, inView];
+}
+
 const TRACKS = [
   {
     title: "Frontend Development",
@@ -67,8 +89,18 @@ export default function Internship() {
   return (
     <main className="bg-slate-950">
       {/* Hero */}
-      <section className="border-b border-white/10 px-6 py-20 sm:py-28">
-        <div className="mx-auto max-w-3xl text-center">
+      <section className="relative overflow-hidden border-b border-white/10 px-6 py-20 sm:py-28">
+        <div className="pointer-events-none absolute inset-0">
+          <div
+            className="i-drift-a absolute left-[8%] top-[-6rem] h-[26rem] w-[26rem] rounded-full blur-3xl"
+            style={{ background: "radial-gradient(circle, rgba(37,99,235,0.35) 0%, rgba(37,99,235,0) 70%)" }}
+          />
+          <div
+            className="i-drift-b absolute right-[6%] bottom-[-6rem] h-[22rem] w-[22rem] rounded-full blur-3xl"
+            style={{ background: "radial-gradient(circle, rgba(14,165,233,0.32) 0%, rgba(14,165,233,0) 70%)" }}
+          />
+        </div>
+        <div className="i-fade-up relative mx-auto max-w-3xl text-center">
           <p className="text-xs font-semibold uppercase tracking-wider text-blue-500">
             Internship Program
           </p>
@@ -91,51 +123,30 @@ export default function Internship() {
       {/* Tracks */}
       <section className="px-6 py-20 sm:py-24">
         <div className="mx-auto max-w-6xl">
-          <div className="text-center">
-            <p className="text-xs font-semibold uppercase tracking-wider text-blue-500">
-              Choose Your Path
-            </p>
-            <h2 className="mt-3 text-3xl font-bold text-white sm:text-4xl">
-              Internship Tracks
-            </h2>
-          </div>
+          <SectionIntro eyebrow="Choose Your Path" title="Internship Tracks" />
 
           <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {TRACKS.map(({ title, description, icon: Icon }) => (
-              <div
-                key={title}
-                className="flex flex-col rounded-2xl border border-white/10 bg-slate-900 p-8 transition-colors hover:border-blue-600/40"
-              >
-                <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-blue-600/15">
-                  <Icon className="h-5 w-5 text-blue-500" />
-                </div>
-                <h3 className="mt-5 text-lg font-semibold text-white">{title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-slate-400">{description}</p>
-              </div>
+            {TRACKS.map(({ title, description, icon: Icon }, i) => (
+              <TrackCard key={title} title={title} description={description} Icon={Icon} index={i} />
             ))}
           </div>
         </div>
       </section>
 
       {/* Process */}
-      <section className="border-t border-white/10 bg-slate-900/40 px-6 py-20 sm:py-24">
-        <div className="mx-auto max-w-6xl">
-          <div className="text-center">
-            <p className="text-xs font-semibold uppercase tracking-wider text-blue-500">
-              How It Works
-            </p>
-            <h2 className="mt-3 text-3xl font-bold text-white sm:text-4xl">
-              Application Process
-            </h2>
-          </div>
+      <section className="relative overflow-hidden border-t border-white/10 bg-slate-900/40 px-6 py-20 sm:py-24">
+        <div className="pointer-events-none absolute inset-0">
+          <div
+            className="i-drift-b absolute left-1/2 top-[-4rem] h-[26rem] w-[26rem] -translate-x-1/2 rounded-full blur-3xl"
+            style={{ background: "radial-gradient(circle, rgba(37,99,235,0.28) 0%, rgba(37,99,235,0) 70%)" }}
+          />
+        </div>
+        <div className="relative mx-auto max-w-6xl">
+          <SectionIntro eyebrow="How It Works" title="Application Process" />
 
           <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {PROCESS.map(({ step, title, description }) => (
-              <div key={step} className="rounded-xl border border-white/10 bg-slate-900 p-6">
-                <span className="text-2xl font-bold text-blue-600/40">{step}</span>
-                <h3 className="mt-3 text-sm font-semibold text-white">{title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-slate-400">{description}</p>
-              </div>
+            {PROCESS.map(({ step, title, description }, i) => (
+              <ProcessCard key={step} step={step} title={title} description={description} index={i} />
             ))}
           </div>
         </div>
@@ -144,48 +155,150 @@ export default function Internship() {
       {/* Benefits */}
       <section className="px-6 py-20 sm:py-24">
         <div className="mx-auto max-w-6xl">
-          <div className="text-center">
-            <p className="text-xs font-semibold uppercase tracking-wider text-blue-500">
-              What You Get
-            </p>
-            <h2 className="mt-3 text-3xl font-bold text-white sm:text-4xl">
-              Program Benefits
-            </h2>
-          </div>
+          <SectionIntro eyebrow="What You Get" title="Program Benefits" />
 
           <div className="mx-auto mt-12 grid max-w-3xl gap-4 sm:grid-cols-2">
-            {BENEFITS.map((benefit) => (
-              <div
-                key={benefit}
-                className="flex items-start gap-3 rounded-xl border border-white/10 bg-slate-900 p-5"
-              >
-                <CheckIcon className="mt-0.5 h-4 w-4 shrink-0 text-blue-500" />
-                <span className="text-sm text-slate-300">{benefit}</span>
-              </div>
+            {BENEFITS.map((benefit, i) => (
+              <BenefitCard key={benefit} benefit={benefit} index={i} />
             ))}
           </div>
         </div>
       </section>
 
       {/* CTA */}
-      <section className="px-6 pb-20 sm:pb-24">
-        <div className="mx-auto max-w-3xl rounded-2xl border border-white/10 bg-slate-900 p-10 text-center sm:p-14">
-          <h2 className="text-2xl font-bold text-white sm:text-3xl">
-            Ready to gain real experience?
-          </h2>
-          <p className="mt-3 text-sm text-slate-400 sm:text-base">
-            Applications are reviewed on a rolling basis — apply today to join the
-            next intake.
-          </p>
-          <a
-            href="/internships/apply"
-            className="mt-6 inline-block rounded-lg bg-blue-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-blue-500"
-          >
-            Apply Now
-          </a>
+      <section className="relative overflow-hidden px-6 pb-20 sm:pb-24">
+        <div className="pointer-events-none absolute inset-0">
+          <div
+            className="i-drift-a absolute left-1/2 top-0 h-[26rem] w-[26rem] -translate-x-1/2 rounded-full blur-3xl"
+            style={{ background: "radial-gradient(circle, rgba(37,99,235,0.3) 0%, rgba(37,99,235,0) 70%)" }}
+          />
         </div>
+        <InternshipCta />
       </section>
+
+      <InternshipStyles />
     </main>
+  );
+}
+
+function SectionIntro({ eyebrow, title }) {
+  const [ref, inView] = useInView({ threshold: 0.3 });
+  return (
+    <div ref={ref} className={`i-fade-up-scroll text-center ${inView ? "i-in" : ""}`}>
+      <p className="text-xs font-semibold uppercase tracking-wider text-blue-500">{eyebrow}</p>
+      <h2 className="mt-3 text-3xl font-bold text-white sm:text-4xl">{title}</h2>
+    </div>
+  );
+}
+
+function TrackCard({ title, description, Icon, index }) {
+  const [ref, inView] = useInView({ threshold: 0.15 });
+  return (
+    <div
+      ref={ref}
+      style={{ transitionDelay: inView ? `${index * 70}ms` : "0ms" }}
+      className={`i-fade-up-scroll flex flex-col rounded-2xl border border-white/10 bg-slate-900 p-8 transition-colors hover:border-blue-600/40 ${
+        inView ? "i-in" : ""
+      }`}
+    >
+      <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-blue-600/15">
+        <Icon className="h-5 w-5 text-blue-500" />
+      </div>
+      <h3 className="mt-5 text-lg font-semibold text-white">{title}</h3>
+      <p className="mt-2 text-sm leading-relaxed text-slate-400">{description}</p>
+    </div>
+  );
+}
+
+function ProcessCard({ step, title, description, index }) {
+  const [ref, inView] = useInView({ threshold: 0.15 });
+  return (
+    <div
+      ref={ref}
+      style={{ transitionDelay: inView ? `${index * 80}ms` : "0ms" }}
+      className={`i-fade-up-scroll rounded-xl border border-white/10 bg-slate-900 p-6 ${inView ? "i-in" : ""}`}
+    >
+      <span className="text-2xl font-bold text-blue-600/40">{step}</span>
+      <h3 className="mt-3 text-sm font-semibold text-white">{title}</h3>
+      <p className="mt-2 text-sm leading-relaxed text-slate-400">{description}</p>
+    </div>
+  );
+}
+
+function BenefitCard({ benefit, index }) {
+  const [ref, inView] = useInView({ threshold: 0.15 });
+  return (
+    <div
+      ref={ref}
+      style={{ transitionDelay: inView ? `${index * 60}ms` : "0ms" }}
+      className={`i-fade-up-scroll flex items-start gap-3 rounded-xl border border-white/10 bg-slate-900 p-5 ${
+        inView ? "i-in" : ""
+      }`}
+    >
+      <CheckIcon className="mt-0.5 h-4 w-4 shrink-0 text-blue-500" />
+      <span className="text-sm text-slate-300">{benefit}</span>
+    </div>
+  );
+}
+
+function InternshipCta() {
+  const [ref, inView] = useInView({ threshold: 0.2 });
+  return (
+    <div
+      ref={ref}
+      className={`i-fade-up-scroll relative mx-auto max-w-3xl rounded-2xl border border-white/10 bg-slate-900 p-10 text-center sm:p-14 ${
+        inView ? "i-in" : ""
+      }`}
+    >
+      <h2 className="text-2xl font-bold text-white sm:text-3xl">
+        Ready to gain real experience?
+      </h2>
+      <p className="mt-3 text-sm text-slate-400 sm:text-base">
+        Applications are reviewed on a rolling basis — apply today to join the
+        next intake.
+      </p>
+      <a
+        href="/internships/apply"
+        className="mt-6 inline-block rounded-lg bg-blue-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-blue-500"
+      >
+        Apply Now
+      </a>
+    </div>
+  );
+}
+
+function InternshipStyles() {
+  return (
+    <style>{`
+      @keyframes iFadeUp {
+        from { opacity: 0; transform: translateY(18px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      .i-fade-up { animation: iFadeUp 0.7s ease-out both; }
+
+      .i-fade-up-scroll { opacity: 0; transform: translateY(18px); transition: opacity 0.6s ease-out, transform 0.6s ease-out; }
+      .i-fade-up-scroll.i-in { opacity: 1; transform: translateY(0); }
+
+      @keyframes iDriftA {
+        0%, 100% { transform: translate(0px, 0px) scale(1); }
+        50% { transform: translate(24px, -18px) scale(1.08); }
+      }
+      @keyframes iDriftB {
+        0%, 100% { transform: translate(0px, 0px) scale(1); }
+        50% { transform: translate(-20px, 16px) scale(1.06); }
+      }
+      .i-drift-a { animation: iDriftA 13s ease-in-out infinite; }
+      .i-drift-b { animation: iDriftB 15s ease-in-out infinite; }
+
+      @media (prefers-reduced-motion: reduce) {
+        .i-fade-up, .i-fade-up-scroll, .i-drift-a, .i-drift-b {
+          animation: none !important;
+          transition: none !important;
+          opacity: 1 !important;
+          transform: none !important;
+        }
+      }
+    `}</style>
   );
 }
 

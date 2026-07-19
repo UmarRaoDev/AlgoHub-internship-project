@@ -36,13 +36,13 @@ export default function Hero() {
     <section
       ref={sectionRef}
       onMouseMove={handleMouseMove}
-      className="spotlight relative overflow-hidden bg-black pb-20 pt-24 sm:pt-28"
+      className="spotlight relative overflow-hidden bg-black pb-20 pt-10 sm:pt-24 lg:pt-28"
     >
       <GridBackdrop />
 
       <div className="relative mx-auto max-w-5xl px-6 text-center ">
         {/* Eyebrow, terminal-style */}
-        <div className="reveal mb-8 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-1.5 font-mono text-xs text-slate-400">
+        <div className="reveal mb-5 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-1.5 font-mono text-xs text-slate-400 sm:mb-8">
           <span className="relative flex h-2 w-2">
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-75" />
             <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
@@ -51,7 +51,7 @@ export default function Hero() {
         </div>
                  
         {/* Kinetic headline */}
-        <h1 className="text-[13vw] font-extrabold leading-[0.95] tracking-tighter text-white sm:text-6xl lg:text-7xl">
+        <h1 className="text-4xl font-extrabold leading-[1.05] tracking-tighter text-white sm:text-6xl sm:leading-[0.95] lg:text-7xl">
           <WordReveal text={HEADLINE_LINE_1} delayStart={0} />
           <br />
           <span className="bg-gradient-to-r from-blue-400 via-sky-400 to-cyan-300 bg-clip-text text-transparent">
@@ -59,24 +59,24 @@ export default function Hero() {
           </span>
         </h1>
 
-        <p className="reveal-delayed mx-auto mt-7 max-w-2xl text-2xl leading-relaxed text-slate-400">
+        <p className="reveal-delayed mx-auto mt-4 max-w-2xl text-base leading-relaxed text-slate-400 sm:mt-7 sm:text-xl lg:text-2xl">
           We design and develop scalable, secure, and AI-powered software solutions for
           startups, businesses, government organizations, and global enterprises. From
           concept to deployment, we build technology that solves real-world problems.
         </p>
 
         {/* CTAs */}
-        <div className="reveal-delayed mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
+        <div className="reveal-delayed mt-6 flex flex-col items-center justify-center gap-3 sm:mt-9 sm:flex-row">
           <MagneticButton
             href="/contact"
-            className="group inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-7 py-3.5 text-sm font-semibold text-white shadow-lg shadow-blue-600/25 transition-colors duration-200 hover:bg-blue-500"
+            className="group inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-600/25 transition-colors duration-200 hover:bg-blue-500 sm:px-7 sm:py-3.5"
           >
             Start a Project
             <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
           </MagneticButton>
           <MagneticButton
             href="/portfolio"
-            className="group inline-flex items-center justify-center gap-2 rounded-lg border border-white/15 px-7 py-3.5 text-sm font-semibold text-slate-200 transition-colors duration-200 hover:border-white/30 hover:bg-white/5"
+            className="group inline-flex items-center justify-center gap-2 rounded-lg border border-white/15 px-6 py-3 text-sm font-semibold text-slate-200 transition-colors duration-200 hover:border-white/30 hover:bg-white/5 sm:px-7 sm:py-3.5"
           >
             <PlayCircle className="h-4 w-4 text-slate-400 transition-colors duration-200 group-hover:text-white" />
             View Our Work
@@ -162,13 +162,19 @@ export default function Hero() {
         .drift-reverse { animation: driftReverse 16s ease-in-out infinite; }
 
         @keyframes twinkle {
-          0%, 100% { opacity: 0.15; transform: translateY(0px); }
-          50% { opacity: 0.9; transform: translateY(-14px); }
+          0%, 100% { opacity: 0.2; transform: translateY(0px); }
+          50% { opacity: 1; transform: translateY(-14px); }
         }
         .twinkle { animation: twinkle 8s ease-in-out infinite; }
 
+        @keyframes gridPan {
+          from { background-position: 0px 0px; }
+          to { background-position: 48px 48px; }
+        }
+        .grid-pan { animation: gridPan 18s linear infinite; }
+
         @media (prefers-reduced-motion: reduce) {
-          .word-up, .reveal, .reveal-delayed, .animate-marquee, .caret, .drift-slow, .drift-reverse, .twinkle { animation: none !important; }
+          .word-up, .reveal, .reveal-delayed, .animate-marquee, .caret, .drift-slow, .drift-reverse, .twinkle, .grid-pan { animation: none !important; }
         }
       `}</style>
 
@@ -314,9 +320,14 @@ const PARTICLES = Array.from({ length: 26 }, (_, i) => ({
 function GridBackdrop() {
   return (
     <div className="pointer-events-none absolute inset-0 overflow-hidden">
-      <div className="drift-slow absolute left-1/2 top-[-8rem] h-[34rem] w-[34rem] -translate-x-1/2 rounded-full bg-blue-600/20 blur-[130px]" />
-      <div className="drift-reverse absolute right-[8%] top-1/3 h-[22rem] w-[22rem] rounded-full bg-sky-500/10 blur-[110px]" />
-      <div className="drift-slow absolute left-[6%] top-1/2 h-[20rem] w-[20rem] rounded-full bg-cyan-400/10 blur-[110px]" />
+      <div className="grid-pan absolute inset-0 opacity-[0.07]" style={{
+        backgroundImage:
+          "linear-gradient(to right, #ffffff 1px, transparent 1px), linear-gradient(to bottom, #ffffff 1px, transparent 1px)",
+        backgroundSize: "48px 48px",
+      }} />
+      <div className="drift-slow absolute left-1/2 top-[-8rem] h-[34rem] w-[34rem] -translate-x-1/2 rounded-full bg-blue-600/25 blur-[130px]" />
+      <div className="drift-reverse absolute right-[8%] top-1/3 h-[22rem] w-[22rem] rounded-full bg-sky-500/15 blur-[110px]" />
+      <div className="drift-slow absolute left-[6%] top-1/2 h-[20rem] w-[20rem] rounded-full bg-cyan-400/15 blur-[110px]" />
 
       {PARTICLES.map((p) => (
         <span

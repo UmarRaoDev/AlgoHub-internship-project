@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from "react";
 import healthcare from "../assets/healthcare.png";
 import finance from "../assets/finance.png";
 import retail from "../assets/retail.png";
@@ -6,6 +7,26 @@ import manufacturing from "../assets/manufacturing.png"; // Keep this if your fi
 import logistics from "../assets/logistics.png";
 import realestate from "../assets/realestate.png";
 import government from "../assets/government.png";
+
+function useInView(options = { threshold: 0.15 }) {
+  const ref = useRef(null);
+  const [inView, setInView] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        setInView(true);
+        observer.disconnect();
+      }
+    }, options);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  return [ref, inView];
+}
 
 const PROJECTS = [
   {
@@ -88,8 +109,18 @@ export default function Portfolio() {
   return (
     <main className="bg-slate-950">
       {/* Hero */}
-      <section className="border-b border-white/10 px-6 py-20 sm:py-28">
-        <div className="mx-auto max-w-3xl text-center">
+      <section className="relative overflow-hidden border-b border-white/10 px-6 py-20 sm:py-28">
+        <div className="pointer-events-none absolute inset-0">
+          <div
+            className="p-drift-a absolute left-[8%] top-[-6rem] h-[26rem] w-[26rem] rounded-full blur-3xl"
+            style={{ background: "radial-gradient(circle, rgba(37,99,235,0.35) 0%, rgba(37,99,235,0) 70%)" }}
+          />
+          <div
+            className="p-drift-b absolute right-[6%] bottom-[-6rem] h-[22rem] w-[22rem] rounded-full blur-3xl"
+            style={{ background: "radial-gradient(circle, rgba(14,165,233,0.32) 0%, rgba(14,165,233,0) 70%)" }}
+          />
+        </div>
+        <div className="p-fade-up relative mx-auto max-w-3xl text-center">
           <p className="text-xs font-semibold uppercase tracking-wider text-blue-500">
             Our Work
           </p>
@@ -103,60 +134,133 @@ export default function Portfolio() {
       {/* Projects grid */}
       <section className="px-6 py-20 sm:py-24">
         <div className="mx-auto grid max-w-6xl gap-6 sm:grid-cols-2">
-          {PROJECTS.map(({ category, title, description, slug, image }) => (
-            <div
+          {PROJECTS.map(({ category, title, description, slug, image }, i) => (
+            <ProjectCard
               key={slug}
-              className="flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-slate-900 transition-colors hover:border-blue-600/40"
-            >
-              <div className="aspect-[16/10] w-full overflow-hidden bg-slate-800">
-                <img
-                  src={image}
-                  alt={title}
-                  className="h-full w-full object-cover"
-                />
-              </div>
-
-              <div className="flex flex-1 flex-col p-8">
-                <span
-                  className={`inline-block w-fit rounded-md px-3 py-1 text-xs font-semibold ${
-                    CATEGORY_STYLES[category] ?? "bg-blue-500/15 text-blue-400"
-                  }`}
-                >
-                  {category}
-                </span>
-                <h3 className="mt-4 text-lg font-semibold text-white">{title}</h3>
-                <p className="mt-2 flex-1 text-sm leading-relaxed text-slate-400">
-                  {description}
-                </p>
-                <a
-                  href={`/portfolio/${slug}`}
-                  className="mt-6 inline-flex w-fit items-center justify-center rounded-lg border border-blue-600/50 px-5 py-2.5 text-sm font-semibold text-blue-500 transition-colors hover:bg-blue-600 hover:text-white"
-                >
-                  Read Case Study
-                </a>
-              </div>
-            </div>
+              category={category}
+              title={title}
+              description={description}
+              slug={slug}
+              image={image}
+              index={i}
+            />
           ))}
         </div>
       </section>
 
       {/* CTA */}
-      <section className="px-6 pb-20 sm:pb-24">
-        <div className="mx-auto max-w-3xl rounded-2xl border border-white/10 bg-slate-900 p-10 text-center sm:p-14">
-          <h2 className="text-2xl font-bold text-white sm:text-3xl">
-            Have a project in mind?
-          </h2>
-          <p className="mt-3 text-sm text-slate-400 sm:text-base">
-            Let's talk about how we can help bring it to life.
-          </p>
-          <a
-            href="/contact"
-            className="mt-6 inline-block rounded-lg bg-blue-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-blue-500"
-          >
-            Get a Quote
-          </a>
+      <section className="relative overflow-hidden px-6 pb-20 sm:pb-24">
+        <div className="pointer-events-none absolute inset-0">
+          <div
+            className="p-drift-a absolute left-1/2 top-0 h-[26rem] w-[26rem] -translate-x-1/2 rounded-full blur-3xl"
+            style={{ background: "radial-gradient(circle, rgba(37,99,235,0.3) 0%, rgba(37,99,235,0) 70%)" }}
+          />
         </div>
+        <PortfolioCta />
       </section>
+
+      <PortfolioStyles />
     </main>
+  );
+}
+
+function ProjectCard({ category, title, description, slug, image, index }) {
+  const [ref, inView] = useInView({ threshold: 0.1 });
+  return (
+    <div
+      ref={ref}
+      style={{ transitionDelay: inView ? `${index * 60}ms` : "0ms" }}
+      className={`p-fade-up-scroll flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-slate-900 transition-colors hover:border-blue-600/40 ${
+        inView ? "p-in" : ""
+      }`}
+    >
+      <div className="aspect-[16/10] w-full overflow-hidden bg-slate-800">
+        <img
+          src={image}
+          alt={title}
+          className="h-full w-full object-cover"
+        />
+      </div>
+
+      <div className="flex flex-1 flex-col p-8">
+        <span
+          className={`inline-block w-fit rounded-md px-3 py-1 text-xs font-semibold ${
+            CATEGORY_STYLES[category] ?? "bg-blue-500/15 text-blue-400"
+          }`}
+        >
+          {category}
+        </span>
+        <h3 className="mt-4 text-lg font-semibold text-white">{title}</h3>
+        <p className="mt-2 flex-1 text-sm leading-relaxed text-slate-400">
+          {description}
+        </p>
+        <a
+          href={`/portfolio/${slug}`}
+          className="mt-6 inline-flex w-fit items-center justify-center rounded-lg border border-blue-600/50 px-5 py-2.5 text-sm font-semibold text-blue-500 transition-colors hover:bg-blue-600 hover:text-white"
+        >
+          Read Case Study
+        </a>
+      </div>
+    </div>
+  );
+}
+
+function PortfolioCta() {
+  const [ref, inView] = useInView({ threshold: 0.2 });
+  return (
+    <div
+      ref={ref}
+      className={`p-fade-up-scroll relative mx-auto max-w-3xl rounded-2xl border border-white/10 bg-slate-900 p-10 text-center sm:p-14 ${
+        inView ? "p-in" : ""
+      }`}
+    >
+      <h2 className="text-2xl font-bold text-white sm:text-3xl">
+        Have a project in mind?
+      </h2>
+      <p className="mt-3 text-sm text-slate-400 sm:text-base">
+        Let's talk about how we can help bring it to life.
+      </p>
+      <a
+        href="/contact"
+        className="mt-6 inline-block rounded-lg bg-blue-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-blue-500"
+      >
+        Get a Quote
+      </a>
+    </div>
+  );
+}
+
+function PortfolioStyles() {
+  return (
+    <style>{`
+      @keyframes pFadeUp {
+        from { opacity: 0; transform: translateY(18px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      .p-fade-up { animation: pFadeUp 0.7s ease-out both; }
+
+      .p-fade-up-scroll { opacity: 0; transform: translateY(18px); transition: opacity 0.6s ease-out, transform 0.6s ease-out; }
+      .p-fade-up-scroll.p-in { opacity: 1; transform: translateY(0); }
+
+      @keyframes pDriftA {
+        0%, 100% { transform: translate(0px, 0px) scale(1); }
+        50% { transform: translate(24px, -18px) scale(1.08); }
+      }
+      @keyframes pDriftB {
+        0%, 100% { transform: translate(0px, 0px) scale(1); }
+        50% { transform: translate(-20px, 16px) scale(1.06); }
+      }
+      .p-drift-a { animation: pDriftA 13s ease-in-out infinite; }
+      .p-drift-b { animation: pDriftB 15s ease-in-out infinite; }
+
+      @media (prefers-reduced-motion: reduce) {
+        .p-fade-up, .p-fade-up-scroll, .p-drift-a, .p-drift-b {
+          animation: none !important;
+          transition: none !important;
+          opacity: 1 !important;
+          transform: none !important;
+        }
+      }
+    `}</style>
   );
 }

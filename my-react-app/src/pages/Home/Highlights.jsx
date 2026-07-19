@@ -104,8 +104,12 @@ export default function Highlights() {
   return (
     <>
       {/* Stats */}
-      <section className="border-y border-white/10 bg-slate-950 py-16">
-        <div ref={statsRef} className="mx-auto grid max-w-6xl grid-cols-2 gap-8 px-6 sm:grid-cols-4">
+      <section className="relative overflow-hidden border-y border-white/10 bg-slate-950 py-16">
+        <div className="pointer-events-none absolute inset-0">
+          <div className="h-drift-a absolute left-[12%] top-1/2 h-64 w-64 -translate-y-1/2 rounded-full bg-blue-600/15 blur-[100px]" />
+          <div className="h-drift-b absolute right-[10%] top-1/2 h-64 w-64 -translate-y-1/2 rounded-full bg-sky-500/10 blur-[100px]" />
+        </div>
+        <div ref={statsRef} className="relative mx-auto grid max-w-6xl grid-cols-2 gap-8 px-6 sm:grid-cols-4">
           {STATS.map((stat) => (
             <StatItem key={stat.label} stat={stat} inView={statsInView} />
           ))}
@@ -113,8 +117,17 @@ export default function Highlights() {
       </section>
 
       {/* Services */}
-      <section className="bg-black py-24">
-        <div className="mx-auto max-w-7xl px-6">
+      <section className="relative overflow-hidden bg-black py-24">
+        <div className="pointer-events-none absolute inset-0">
+          <div className="h-drift-a absolute -left-24 top-0 h-[26rem] w-[26rem] rounded-full bg-blue-600/10 blur-[120px]" />
+          <div className="h-drift-b absolute -right-24 bottom-0 h-[24rem] w-[24rem] rounded-full bg-cyan-400/10 blur-[120px]" />
+          <div className="h-grid-pan absolute inset-0 opacity-[0.05]" style={{
+            backgroundImage:
+              "linear-gradient(to right, #ffffff 1px, transparent 1px), linear-gradient(to bottom, #ffffff 1px, transparent 1px)",
+            backgroundSize: "56px 56px",
+          }} />
+        </div>
+        <div className="relative mx-auto max-w-7xl px-6">
           <SectionHeading
             eyebrow="What We Do"
             title="Our Expertise"
@@ -130,8 +143,12 @@ export default function Highlights() {
       </section>
 
       {/* Why choose us */}
-      <section className="bg-slate-950 py-24">
-        <div className="mx-auto grid max-w-7xl grid-cols-1 gap-16 px-6 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+      <section className="relative overflow-hidden bg-slate-950 py-24">
+        <div className="pointer-events-none absolute inset-0">
+          <div className="h-drift-b absolute right-[-6rem] top-1/4 h-[22rem] w-[22rem] rounded-full bg-blue-600/10 blur-[110px]" />
+          <div className="h-drift-a absolute left-[-4rem] bottom-0 h-[18rem] w-[18rem] rounded-full bg-sky-500/10 blur-[110px]" />
+        </div>
+        <div className="relative mx-auto grid max-w-7xl grid-cols-1 gap-16 px-6 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
           <div>
             <SectionHeading eyebrow="Why AlgoHub" title="Why Choose AlgoHub" align="left" />
             <p className="mt-5 max-w-md text-slate-400">
@@ -150,8 +167,12 @@ export default function Highlights() {
       </section>
 
       {/* How we work */}
-      <section className="bg-black py-24">
-        <div className="mx-auto max-w-7xl px-6">
+      <section className="relative overflow-hidden bg-black py-24">
+        <div className="pointer-events-none absolute inset-0">
+          <div className="h-drift-a absolute left-1/2 top-[-6rem] h-[28rem] w-[28rem] -translate-x-1/2 rounded-full bg-blue-600/10 blur-[130px]" />
+          <div className="h-drift-b absolute right-[5%] bottom-[-4rem] h-[20rem] w-[20rem] rounded-full bg-cyan-400/10 blur-[110px]" />
+        </div>
+        <div className="relative mx-auto max-w-7xl px-6">
           <SectionHeading
             eyebrow="Our Process"
             title="How We Work"
@@ -168,6 +189,29 @@ export default function Highlights() {
           </div>
         </div>
       </section>
+
+      <style>{`
+        @keyframes hDriftA {
+          0%, 100% { transform: translate(0px, 0px) scale(1); }
+          50% { transform: translate(26px, -18px) scale(1.08); }
+        }
+        @keyframes hDriftB {
+          0%, 100% { transform: translate(0px, 0px) scale(1); }
+          50% { transform: translate(-22px, 16px) scale(1.06); }
+        }
+        .h-drift-a { animation: hDriftA 13s ease-in-out infinite; }
+        .h-drift-b { animation: hDriftB 15s ease-in-out infinite; }
+
+        @keyframes hGridPan {
+          from { background-position: 0px 0px; }
+          to { background-position: 56px 56px; }
+        }
+        .h-grid-pan { animation: hGridPan 20s linear infinite; }
+
+        @media (prefers-reduced-motion: reduce) {
+          .h-drift-a, .h-drift-b, .h-grid-pan { animation: none !important; }
+        }
+      `}</style>
     </>
   );
 }
