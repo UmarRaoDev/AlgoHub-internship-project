@@ -1,6 +1,7 @@
 import { useState } from "react";
 import logo from "../assets/logo.png";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 const NAV_LINKS = [
   { label: "Home", href: "/" },
@@ -18,7 +19,6 @@ const NAV_LINKS = [
     href: "#",
     children: [
       { label: "All Services", href: "/services" },
-     
       { label: "Technologies", href: "/technologies" },
     ],
   },
@@ -29,26 +29,33 @@ const NAV_LINKS = [
 
 const WHATSAPP_LINK = "https://wa.me/message/ZOMUVFYRNUSBN1";
 
-// NOTE: swap the <a> tags for react-router-dom's <Link to="..."> if this
-// project uses client-side routing — hrefs are already set up to match 1:1.
-
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState(null);
   const [mobileAccordion, setMobileAccordion] = useState(null);
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  async function handleLogout() {
+    await logout();
+    navigate("/");
+  }
 
   return (
-    <header className="sticky top-0 z-50 border-b border-white/10 bg-black backdrop-blur-md">
-      <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-        {/* Logo — drop your image here */}
-       <Link to="/" className="flex shrink-0 items-center gap-2 group">
+    <header className="sticky top-0 z-50 border-b border-white/10 bg-black/90 backdrop-blur-md">
+      <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 sm:px-6 py-3.5">
+        
+        {/* Brand Logo */}
+        <Link to="/" className="flex shrink-0 items-center gap-2 group">
           <img
             src={logo}
-            className="h-12 w-auto transition-transform duration-300 ease-out group-hover:scale-105"
+            alt="Logo"
+            className="h-10 w-auto transition-transform duration-300 ease-out group-hover:scale-105"
           />
         </Link>
-        {/* Desktop nav links */}
-      <ul className="hidden items-center gap-8 lg:flex">
+
+        {/* Desktop Links */}
+        <ul className="hidden items-center gap-7 lg:flex">
           {NAV_LINKS.map((link) => (
             <li
               key={link.label}
@@ -58,7 +65,7 @@ export default function Navbar() {
             >
               <a
                 href={link.href}
-                className="relative flex items-center gap-1 text-lg font-medium text-slate-300 transition-colors duration-200 hover:text-white"
+                className="relative flex items-center gap-1 text-base font-medium text-slate-300 transition-colors duration-200 hover:text-white"
               >
                 {link.label}
                 {link.children && (
@@ -68,7 +75,6 @@ export default function Navbar() {
                     }`}
                   />
                 )}
-                {/* animated underline */}
                 <span className="absolute -bottom-1 left-0 h-[2px] w-full origin-left scale-x-0 bg-blue-500 transition-transform duration-300 ease-out group-hover:scale-x-100" />
               </a>
 
@@ -80,20 +86,12 @@ export default function Navbar() {
                       : "pointer-events-none -translate-y-2 opacity-0"
                   }`}
                 >
-                  <ul className="w-56 rounded-xl border border-white/10 bg-slate-900 py-2 shadow-xl shadow-black/40">
-                    {link.children.map((child, i) => (
-                      <li
-                        key={child.label}
-                        className="transition-all duration-300 ease-out"
-                        style={{
-                          transitionDelay: openDropdown === link.label ? `${i * 40}ms` : "0ms",
-                          opacity: openDropdown === link.label ? 1 : 0,
-                          transform: openDropdown === link.label ? "translateX(0)" : "translateX(-6px)",
-                        }}
-                      >
+                  <ul className="w-52 rounded-xl border border-white/10 bg-slate-900/95 py-2 shadow-xl shadow-black/50 backdrop-blur-md">
+                    {link.children.map((child) => (
+                      <li key={child.label}>
                         <Link
                           to={child.href}
-                          className="block px-4 py-2.5 text-sm text-slate-300 transition-colors duration-200 hover:bg-white/5 hover:text-white"
+                          className="block px-4 py-2 text-sm text-slate-300 transition-colors duration-200 hover:bg-white/5 hover:text-white"
                         >
                           {child.label}
                         </Link>
@@ -105,45 +103,96 @@ export default function Navbar() {
             </li>
           ))}
         </ul>
-        {/* Right-side actions — desktop */}
-        <div className="hidden items-center gap-3 lg:flex">
+
+        {/* Desktop Actions */}
+        <div className="hidden items-center gap-4 lg:flex">
           <a
             href={WHATSAPP_LINK}
             target="_blank"
             rel="noopener noreferrer"
-            className="group flex items-center gap-2 text-sm font-medium text-slate-300 transition-colors duration-200 hover:text-white"
+            className="group flex items-center gap-1.5 text-sm font-medium text-slate-300 hover:text-white"
           >
-            <WhatsAppIcon className="h-4 w-4 transition-transform duration-200 group-hover:scale-110 group-hover:-rotate-6" />
+            <WhatsAppIcon className="h-4 w-4 text-emerald-400 transition-transform duration-200 group-hover:scale-110" />
             Chat
           </a>
+
+          {user ? (
+            <div className="flex items-center gap-3 border-l border-white/10 pl-4">
+              <Link
+                to="/profile"
+                className="text-sm font-medium text-slate-300 hover:text-white"
+              >
+                Profile
+              </Link>
+              {(user.role === "admin" || user.role === "editor") && (
+                <Link
+                  to="/admin/users"
+                  className="text-sm font-medium text-slate-300 hover:text-white"
+                >
+                  {user.role === "admin" ? "Admin" : "Users"}
+                </Link>
+              )}
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="rounded-lg border border-white/15 px-3 py-1.5 text-sm font-medium text-slate-300 hover:border-white/30 hover:bg-white/5"
+              >
+                Logout
+              </button>
+            </div>
+          ) : (
+            <Link
+              to="/login"
+              className="text-sm font-medium text-slate-300 hover:text-white"
+            >
+              Log In
+            </Link>
+          )}
+
           <Link
             to="/contact"
-            className="rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-blue-600/20 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:bg-blue-500 hover:shadow-lg hover:shadow-blue-600/30 active:translate-y-0 active:scale-95"
+            className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-md shadow-blue-600/20 transition-all duration-200 hover:bg-blue-500 active:scale-95"
           >
             Get a Quote
           </Link>
         </div>
 
-        {/* Mobile menu toggle */}
-        <button
-          type="button"
-          onClick={() => setMobileOpen((prev) => !prev)}
-          className="flex h-10 w-10 items-center justify-center rounded-lg text-slate-300 hover:bg-white/5 lg:hidden"
-          aria-label={mobileOpen ? "Close menu" : "Open menu"}
-          aria-expanded={mobileOpen}
-        >
-          {mobileOpen ? <CloseIcon className="h-6 w-6" /> : <MenuIcon className="h-6 w-6" />}
-        </button>
+        {/* Mobile View: Actions directly accessible + Hamburger Toggle */}
+        <div className="flex items-center gap-2 lg:hidden">
+          {user ? (
+            <Link
+              to="/profile"
+              className="rounded-lg border border-white/15 px-3 py-1.5 text-xs font-semibold text-slate-200 hover:bg-white/5"
+            >
+              Profile
+            </Link>
+          ) : (
+            <Link
+              to="/login"
+              className="rounded-lg bg-blue-600/90 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-blue-500"
+            >
+              Log In
+            </Link>
+          )}
+
+          <button
+            type="button"
+            onClick={() => setMobileOpen((prev) => !prev)}
+            className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-300 hover:bg-white/5"
+            aria-label={mobileOpen ? "Close menu" : "Open menu"}
+          >
+            {mobileOpen ? <CloseIcon className="h-6 w-6" /> : <MenuIcon className="h-6 w-6" />}
+          </button>
+        </div>
       </nav>
 
-      {/* Mobile menu panel */}
-     {/* Mobile menu panel */}
+      {/* Mobile Drawer Menu */}
       <div
-        className={`grid overflow-hidden border-white/10 bg-slate-950 transition-all duration-400 ease-out lg:hidden ${
-          mobileOpen ? "grid-rows-[1fr] border-t opacity-100" : "grid-rows-[0fr] opacity-0"
+        className={`grid overflow-hidden bg-slate-950 transition-all duration-300 ease-out lg:hidden ${
+          mobileOpen ? "grid-rows-[1fr] border-t border-white/10 opacity-100" : "grid-rows-[0fr] opacity-0"
         }`}
       >
-        <div className="min-h-0 px-6 pb-6">
+        <div className="min-h-0 px-6 py-4">
           <ul className="flex flex-col divide-y divide-white/5">
             {NAV_LINKS.map((link) => (
               <li key={link.label} className="py-1">
@@ -154,18 +203,18 @@ export default function Navbar() {
                       onClick={() =>
                         setMobileAccordion((prev) => (prev === link.label ? null : link.label))
                       }
-                      className="flex w-full items-center justify-between py-3 text-left text-sm font-medium text-slate-300 transition-colors duration-200 hover:text-white"
+                      className="flex w-full items-center justify-between py-2.5 text-sm font-medium text-slate-300"
                     >
                       {link.label}
                       <ChevronIcon
-                        className={`h-4 w-4 transition-transform duration-300 ease-out ${
+                        className={`h-4 w-4 transition-transform duration-200 ${
                           mobileAccordion === link.label ? "rotate-180" : ""
                         }`}
                       />
                     </button>
                     <div
-                      className={`grid overflow-hidden transition-all duration-300 ease-out ${
-                        mobileAccordion === link.label ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+                      className={`grid overflow-hidden transition-all duration-200 ${
+                        mobileAccordion === link.label ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
                       }`}
                     >
                       <ul className="ml-3 flex min-h-0 flex-col gap-1 pb-2">
@@ -174,7 +223,7 @@ export default function Navbar() {
                             <Link
                               to={child.href}
                               onClick={() => setMobileOpen(false)}
-                              className="block py-2 text-sm text-slate-400 transition-colors duration-200 hover:text-white"
+                              className="block py-1.5 text-sm text-slate-400 hover:text-white"
                             >
                               {child.label}
                             </Link>
@@ -187,7 +236,7 @@ export default function Navbar() {
                   <Link
                     to={link.href}
                     onClick={() => setMobileOpen(false)}
-                    className="block py-3 text-sm font-medium text-slate-300 transition-colors duration-200 hover:text-white"
+                    className="block py-2.5 text-sm font-medium text-slate-300 hover:text-white"
                   >
                     {link.label}
                   </Link>
@@ -196,21 +245,46 @@ export default function Navbar() {
             ))}
           </ul>
 
-          <div className="mt-4 flex flex-col gap-3">
+          <div className="mt-4 flex flex-col gap-2.5 border-t border-white/10 pt-4">
+            {user && (
+              <>
+                {(user.role === "admin" || user.role === "editor") && (
+                  <Link
+                    to="/admin/users"
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center justify-center rounded-lg border border-white/10 py-2 text-sm font-medium text-slate-300"
+                  >
+                    {user.role === "admin" ? "Admin Panel" : "View Users"}
+                  </Link>
+                )}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMobileOpen(false);
+                    handleLogout();
+                  }}
+                  className="flex items-center justify-center rounded-lg border border-red-500/20 bg-red-500/10 py-2 text-sm font-medium text-red-400"
+                >
+                  Logout
+                </button>
+              </>
+            )}
+
             <a
               href={WHATSAPP_LINK}
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => setMobileOpen(false)}
-              className="flex items-center justify-center gap-2 rounded-lg border border-white/10 py-2.5 text-sm font-medium text-slate-300 transition-all duration-200 hover:border-white/20 hover:bg-white/5 active:scale-95"
+              className="flex items-center justify-center gap-2 rounded-lg border border-white/10 py-2 text-sm font-medium text-slate-300"
             >
-              <WhatsAppIcon className="h-4 w-4" />
+              <WhatsAppIcon className="h-4 w-4 text-emerald-400" />
               Chat on WhatsApp
             </a>
+
             <Link
               to="/contact"
               onClick={() => setMobileOpen(false)}
-              className="rounded-lg bg-blue-600 py-2.5 text-center text-sm font-semibold text-white transition-all duration-200 hover:bg-blue-500 active:scale-95"
+              className="rounded-lg bg-blue-600 py-2 text-center text-sm font-semibold text-white"
             >
               Get a Quote
             </Link>

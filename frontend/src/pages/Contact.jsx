@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { submitContactRequest } from "../api/contactApi";
 
 function useInView(options = { threshold: 0.15 }) {
   const ref = useRef(null);
@@ -47,6 +48,7 @@ const CONTACT_DETAILS = [
 export default function Contact() {
   const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" });
   const [status, setStatus] = useState("idle"); // idle | submitting | success | error
+  const [errorMessage, setErrorMessage] = useState("");
 
   function handleChange(e) {
     const { name, value } = e.target;
@@ -56,14 +58,14 @@ export default function Contact() {
   async function handleSubmit(e) {
     e.preventDefault();
     setStatus("submitting");
+    setErrorMessage("");
     try {
-      // TODO: wire this up to your actual backend/email service (e.g. an API route,
-      // Formspree, EmailJS, etc.) — this just simulates a request for now.
-      await new Promise((resolve) => setTimeout(resolve, 900));
+      await submitContactRequest(form);
       setStatus("success");
       setForm({ name: "", email: "", subject: "", message: "" });
-    } catch {
+    } catch (err) {
       setStatus("error");
+      setErrorMessage(err.message);
     }
   }
 
@@ -108,6 +110,7 @@ export default function Contact() {
           <ContactForm
             form={form}
             status={status}
+            errorMessage={errorMessage}
             handleChange={handleChange}
             handleSubmit={handleSubmit}
           />
@@ -121,7 +124,7 @@ export default function Contact() {
   );
 }
 
-function ContactForm({ form, status, handleChange, handleSubmit }) {
+function ContactForm({ form, status, errorMessage, handleChange, handleSubmit }) {
   const [ref, inView] = useInView({ threshold: 0.1 });
 
   return (
@@ -194,7 +197,7 @@ function ContactForm({ form, status, handleChange, handleSubmit }) {
       )}
       {status === "error" && (
         <p className="c-fade-up mt-4 text-sm text-red-400">
-          Something went wrong. Please try again or email us directly.
+          {errorMessage || "Something went wrong. Please try again or email us directly."}
         </p>
       )}
     </form>
