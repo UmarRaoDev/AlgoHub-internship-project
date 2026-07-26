@@ -13,12 +13,28 @@ connectDB().catch((err) => {
   console.error('Failed to connect to database:', err.message);
 });
 
-app.use(
-  cors({
-    origin: process.env.CLIENT_URL || 'http://localhost:5173',
-    credentials: true, // required so the browser sends/receives the refresh-token cookie
-  })
-);
+const allowedOrigins = [
+  process.env.CLIENT_URL || 'http://localhost:5173',
+];
+
+const corsOptions = {
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true); // allow non-browser requests (curl, Postman, etc.)
+
+    const isAllowed =
+      allowedOrigins.includes(origin) ||
+      /^https:\/\/algo-hub-internship-project.*\.vercel\.app$/.test(origin);
+
+    if (isAllowed) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS: ' + origin));
+    }
+  },
+  credentials: true, // required so the browser sends/receives the refresh-token cookie
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(cookieParser());
 
