@@ -9,7 +9,9 @@ const contactRoutes = require('./routes/contactRoutes');
 
 const app = express();
 
-connectDB();
+connectDB().catch((err) => {
+  console.error('Failed to connect to database:', err.message);
+});
 
 app.use(
   cors({
