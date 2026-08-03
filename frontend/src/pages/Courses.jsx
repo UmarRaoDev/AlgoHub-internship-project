@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from "react";
+import { getPublishedCoursesRequest } from "../api/courseApi";
+import { getCourseIcon } from "../utils/courseIcons";
 
 function useInView(options = { threshold: 0.15 }) {
   const ref = useRef(null);
@@ -20,57 +22,8 @@ function useInView(options = { threshold: 0.15 }) {
   return [ref, inView];
 }
 
-const COURSES = [
-  {
-    title: "Full-Stack Web Development",
-    level: "Beginner to Intermediate",
-    duration: "8 Weeks",
-    description:
-      "Learn to build modern web applications from scratch using React, Node.js, and MongoDB, with hands-on projects each week.",
-    icon: CodeIcon,
-  },
-  {
-    title: "AI & Machine Learning Fundamentals",
-    level: "Intermediate",
-    duration: "10 Weeks",
-    description:
-      "Understand core ML concepts, Python tooling, and how to build and deploy real-world AI models for business use cases.",
-    icon: SparkIcon,
-  },
-  {
-    title: "React & Modern Frontend",
-    level: "Beginner",
-    duration: "6 Weeks",
-    description:
-      "Master component-driven UI development with React, Tailwind CSS, and state management patterns used in production apps.",
-    icon: LayersIcon,
-  },
-  {
-    title: "Cloud & DevOps Essentials",
-    level: "Intermediate",
-    duration: "6 Weeks",
-    description:
-      "Get hands-on with AWS, Docker, and CI/CD pipelines to deploy and scale applications the way modern teams do.",
-    icon: CloudIcon,
-  },
-  {
-    title: "Mobile App Development",
-    level: "Beginner to Intermediate",
-    duration: "8 Weeks",
-    description:
-      "Build cross-platform mobile apps with Flutter and React Native, from UI design to publishing on app stores.",
-    icon: PhoneIcon,
-  },
-  {
-    title: "UI/UX Design Bootcamp",
-    level: "Beginner",
-    duration: "5 Weeks",
-    description:
-      "Learn design thinking, wireframing, and prototyping in Figma to design interfaces people actually enjoy using.",
-    icon: PenIcon,
-  },
-];
-
+// Kept hardcoded for now — not part of the CMS scope yet, only "Course
+// Management" (the COURSES list below) was in the requirements.
 const WHY_POINTS = [
   {
     title: "Industry-Led Curriculum",
@@ -91,6 +44,23 @@ const WHY_POINTS = [
 ];
 
 export default function Courses() {
+  const [courses, setCourses] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const data = await getPublishedCoursesRequest();
+        setCourses(data.courses);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
+
   return (
     <main className="bg-slate-950">
       {/* Hero */}
@@ -124,19 +94,29 @@ export default function Courses() {
         <div className="mx-auto max-w-6xl">
           <SectionIntro eyebrow="Our Courses" title="Choose Your Learning Path" />
 
-          <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {COURSES.map(({ title, level, duration, description, icon: Icon }, i) => (
-              <CourseCard
-                key={title}
-                title={title}
-                level={level}
-                duration={duration}
-                description={description}
-                Icon={Icon}
-                index={i}
-              />
-            ))}
-          </div>
+          {error && (
+            <p className="mx-auto mt-8 max-w-3xl rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-center text-sm text-red-400">
+              {error}
+            </p>
+          )}
+
+          {loading ? (
+            <p className="mt-12 text-center text-sm text-slate-400">Loading courses...</p>
+          ) : (
+            <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {courses.map((course, i) => (
+                <CourseCard
+                  key={course._id}
+                  title={course.title}
+                  level={course.level}
+                  duration={course.duration}
+                  description={course.description}
+                  Icon={getCourseIcon(course.icon)}
+                  index={i}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
@@ -299,59 +279,6 @@ function ArrowIcon(props) {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
       <path d="M5 12h14M13 6l6 6-6 6" />
-    </svg>
-  );
-}
-
-function CodeIcon(props) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <path d="m16 18 6-6-6-6M8 6l-6 6 6 6" />
-    </svg>
-  );
-}
-
-function SparkIcon(props) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M5.6 18.4l2.8-2.8M15.6 8.4l2.8-2.8" />
-    </svg>
-  );
-}
-
-function LayersIcon(props) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <path d="m12 2 9 5-9 5-9-5 9-5Z" />
-      <path d="m3 12 9 5 9-5M3 17l9 5 9-5" />
-    </svg>
-  );
-}
-
-function CloudIcon(props) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <path d="M17.5 19a4.5 4.5 0 0 0 0-9 6 6 0 0 0-11.4-1.7A4.5 4.5 0 0 0 6.5 19h11Z" />
-    </svg>
-  );
-}
-
-function PhoneIcon(props) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <rect x="6" y="2" width="12" height="20" rx="2" />
-      <path d="M11 18h2" />
-    </svg>
-  );
-}
-
-function PenIcon(props) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <path d="m12 19 7-7 3 3-7 7-3-3Z" />
-      <path d="m18 13-1.5-7.5L2 2l3.5 14.5L13 18l5-5Z" />
-      <path d="m2 2 7.586 7.586" />
-      <circle cx="11" cy="11" r="2" />
     </svg>
   );
 }

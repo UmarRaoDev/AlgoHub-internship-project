@@ -6,6 +6,12 @@ const connectDB = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const contactRoutes = require('./routes/contactRoutes');
+const serviceRoutes = require('./routes/serviceRoutes');
+const internshipRoutes = require('./routes/internshipRoutes');
+const courseRoutes = require('./routes/courseRoutes');
+const dashboardRoutes = require('./routes/dashboardRoutes');
+const teamRoutes = require('./routes/teamRoutes');
+const faqRoutes = require('./routes/faqRoutes');
 
 const app = express();
 
@@ -48,6 +54,12 @@ app.use(async (req, res, next) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/contact', contactRoutes);
+app.use('/api/services', serviceRoutes);
+app.use('/api/internship', internshipRoutes);
+app.use('/api/courses', courseRoutes);
+app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/team', teamRoutes);
+app.use('/api/faqs', faqRoutes);
 
 app.get('/', (req, res) => {
   res.send('AlgoHub API is running');

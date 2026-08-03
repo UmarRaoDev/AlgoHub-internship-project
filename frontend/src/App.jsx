@@ -13,6 +13,13 @@ import { BrowserRouter,Route,Routes,useLocation } from "react-router-dom";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminUsers from "./pages/AdminUsers" ;
+import AdminLayout from "./components/admin/AdminLayout";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminServices from "./pages/admin/AdminServices";
+import AdminInternship from "./pages/admin/AdminInternship";
+import AdminCourses from "./pages/admin/AdminCourses";
+import AdminTeam from "./pages/admin/AdminTeam";
+import AdminFaqs from "./pages/admin/AdminFaqs";
 import Profile from "./pages/Profile";
 
 import { useEffect } from "react";
@@ -60,13 +67,22 @@ function App() {
     <Route path="/" element={<Hero/>}/>
 
   <Route
-  path="/admin/users"
+  path="/admin"
   element={
     <ProtectedRoute roles={["admin", "editor"]}>
-      <AdminUsers />
+      <AdminLayout />
     </ProtectedRoute>
   }
-/>
+>
+  <Route index element={<AdminDashboard />} />
+  <Route path="users" element={<AdminUsers />} />
+  <Route path="services" element={<AdminServices />} />
+  <Route path="internship" element={<AdminInternship />} />
+  <Route path="courses" element={<AdminCourses />} />
+  <Route path="team" element={<AdminTeam />} />
+  <Route path="faqs" element={<AdminFaqs />} />
+  {/* Add one line here per module as each one gets built */}
+</Route>
 
     <Route path="/about" element={<About/>}/>
 

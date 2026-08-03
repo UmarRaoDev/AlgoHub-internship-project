@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { getTeamMembersRequest } from "../api/teamApi";
 
 function useInView(options = { threshold: 0.15 }) {
   const ref = useRef(null);
@@ -20,35 +21,46 @@ function useInView(options = { threshold: 0.15 }) {
   return [ref, inView];
 }
 
-const LEADERSHIP = [{ name: "M. Younas", role: "Chief Executive Officer", initials: "MY" }];
+// Groups the flat member list into leadership + departments, preserving the
+// order members already come back in (sorted by the backend: leadership
+// first, then department name, then each member's `order`).
+function groupMembers(members) {
+  const leadership = members.filter((m) => m.isLeadership);
+  const rest = members.filter((m) => !m.isLeadership);
 
-const DEPARTMENTS = [
-  {
-    name: "Engineering",
-    members: [
-      { name: "Ahmad Raza", role: "Lead Software Engineer", initials: "AR" },
-      { name: "Sara Khan", role: "Backend Developer", initials: "SK" },
-      { name: "Bilal Hassan", role: "Frontend Developer", initials: "BH" },
-    ],
-  },
-  {
-    name: "Design",
-    members: [
-      { name: "Ayesha Malik", role: "UI/UX Designer", initials: "AM" },
-      { name: "Usman Tariq", role: "Product Designer", initials: "UT" },
-    ],
-  },
-  {
-    name: "AI & Data",
-    members: [{ name: "Hamza Iqbal", role: "AI Engineer", initials: "HI" }],
-  },
-  {
-    name: "Operations",
-    members: [{ name: "Nadia Farooq", role: "Project Coordinator", initials: "NF" }],
-  },
-];
+  const departments = [];
+  for (const member of rest) {
+    let dept = departments.find((d) => d.name === member.department);
+    if (!dept) {
+      dept = { name: member.department, members: [] };
+      departments.push(dept);
+    }
+    dept.members.push(member);
+  }
+
+  return { leadership, departments };
+}
 
 export default function Team() {
+  const [members, setMembers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const data = await getTeamMembersRequest();
+        setMembers(data.members);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
+
+  const { leadership, departments } = groupMembers(members);
+
   return (
     <main className="bg-slate-950">
       {/* Hero */}
@@ -77,40 +89,56 @@ export default function Team() {
         </div>
       </section>
 
-      {/* Leadership */}
-      <section className="px-6 py-20 sm:py-24">
-        <div className="mx-auto max-w-6xl">
-          <SectionIntro eyebrow="Leadership" title="Leading the Way" />
+      {error && (
+        <p className="mx-auto mt-8 max-w-3xl rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-center text-sm text-red-400">
+          {error}
+        </p>
+      )}
 
-          <div className="mt-12 flex justify-center">
-            {LEADERSHIP.map((person, i) => (
-              <MemberCard key={person.name} {...person} index={i} className="max-w-xs" />
-            ))}
-          </div>
-        </div>
-      </section>
+      {loading ? (
+        <p className="px-6 py-20 text-center text-sm text-slate-400">Loading team...</p>
+      ) : (
+        <>
+          {/* Leadership */}
+          {leadership.length > 0 && (
+            <section className="px-6 py-20 sm:py-24">
+              <div className="mx-auto max-w-6xl">
+                <SectionIntro eyebrow="Leadership" title="Leading the Way" />
 
-      {/* Departments */}
-      <section className="relative overflow-hidden border-t border-white/10 bg-slate-900/40 px-6 py-20 sm:py-24">
-        <div className="pointer-events-none absolute inset-0">
-          <div
-            className="t-drift-b absolute left-1/2 top-[-4rem] h-[26rem] w-[26rem] -translate-x-1/2 rounded-full blur-3xl"
-            style={{ background: "radial-gradient(circle, rgba(37,99,235,0.28) 0%, rgba(37,99,235,0) 70%)" }}
-          />
-        </div>
-        <div className="relative mx-auto max-w-6xl space-y-16">
-          {DEPARTMENTS.map((dept) => (
-            <div key={dept.name}>
-              <h2 className="text-xl font-semibold text-white">{dept.name}</h2>
-              <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {dept.members.map((person, i) => (
-                  <MemberCard key={person.name} {...person} index={i} />
+                <div className="mt-12 flex flex-wrap justify-center gap-6">
+                  {leadership.map((person, i) => (
+                    <MemberCard key={person._id} {...person} index={i} className="max-w-xs" />
+                  ))}
+                </div>
+              </div>
+            </section>
+          )}
+
+          {/* Departments */}
+          {departments.length > 0 && (
+            <section className="relative overflow-hidden border-t border-white/10 bg-slate-900/40 px-6 py-20 sm:py-24">
+              <div className="pointer-events-none absolute inset-0">
+                <div
+                  className="t-drift-b absolute left-1/2 top-[-4rem] h-[26rem] w-[26rem] -translate-x-1/2 rounded-full blur-3xl"
+                  style={{ background: "radial-gradient(circle, rgba(37,99,235,0.28) 0%, rgba(37,99,235,0) 70%)" }}
+                />
+              </div>
+              <div className="relative mx-auto max-w-6xl space-y-16">
+                {departments.map((dept) => (
+                  <div key={dept.name}>
+                    <h2 className="text-xl font-semibold text-white">{dept.name}</h2>
+                    <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                      {dept.members.map((person, i) => (
+                        <MemberCard key={person._id} {...person} index={i} />
+                      ))}
+                    </div>
+                  </div>
                 ))}
               </div>
-            </div>
-          ))}
-        </div>
-      </section>
+            </section>
+          )}
+        </>
+      )}
 
       {/* CTA */}
       <section className="relative overflow-hidden px-6 py-20 sm:py-24">

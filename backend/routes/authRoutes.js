@@ -12,6 +12,8 @@ const {
 
 const router = express.Router();
 
+
+
 // Apply limiters and validation before hitting the controllers
 router.post('/register', authLimiter, validate(registerSchema), register);
 router.post('/login', authLimiter, validate(loginSchema), login);

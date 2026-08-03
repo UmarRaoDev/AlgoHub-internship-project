@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { getFaqsRequest } from "../api/faqApi";
 
 function useInView(options = { threshold: 0.15 }) {
   const ref = useRef(null);
@@ -20,76 +21,41 @@ function useInView(options = { threshold: 0.15 }) {
   return [ref, inView];
 }
 
-
-const FAQ_GROUPS = [
-  {
-    category: "General",
-    items: [
-      {
-        question: "What services does AlgoHub offer?",
-        answer:
-          "We build custom software, web and mobile apps, AI-powered solutions, cloud infrastructure, and UI/UX design for businesses of all sizes.",
-      },
-      {
-        question: "Where is AlgoHub based?",
-        answer:
-          "We're based in Mardan, Khyber Pakhtunkhwa, Pakistan, and work with clients both locally and internationally.",
-      },
-      {
-        question: "Do you work with startups as well as large companies?",
-        answer:
-          "Yes — we work with startups, growing businesses, and enterprise organizations, and tailor our process to the scale of each project.",
-      },
-    ],
-  },
-  {
-    category: "Working With Us",
-    items: [
-      {
-        question: "How does the project process work?",
-        answer:
-          "We follow a structured process: Discovery, Planning, UI/UX Design, Development, QA Testing, Deployment, and ongoing Support.",
-      },
-      {
-        question: "How long does a typical project take?",
-        answer:
-          "Timelines vary by scope — a simple website may take a few weeks, while a full enterprise platform can take several months. We share an estimated timeline after the discovery phase.",
-      },
-      {
-        question: "How much does a project cost?",
-        answer:
-          "Cost depends on complexity, features, and timeline. We provide a detailed quote after understanding your requirements — reach out via our Contact page to get started.",
-      },
-      {
-        question: "Do you offer ongoing support after launch?",
-        answer:
-          "Yes, we offer maintenance and support packages to keep your software running smoothly after deployment.",
-      },
-    ],
-  },
-  {
-    category: "Internships & Courses",
-    items: [
-      {
-        question: "How do I apply for an internship at AlgoHub?",
-        answer:
-          "Visit our Internship page and submit an application. We review applications on a rolling basis and reach out for a screening call.",
-      },
-      {
-        question: "Are the courses beginner-friendly?",
-        answer:
-          "Yes, most of our courses are designed for beginners to intermediate learners, with hands-on projects to build practical skills.",
-      },
-      {
-        question: "Do I get a certificate after completing a course?",
-        answer:
-          "Yes, every course includes a certificate of completion, which can be verified through our Verify Certificate page.",
-      },
-    ],
-  },
-];
+// Groups the flat FAQ list into categories, preserving the order they
+// already come back in (sorted by the backend: category name, then order).
+function groupFaqs(faqs) {
+  const groups = [];
+  for (const faq of faqs) {
+    let group = groups.find((g) => g.category === faq.category);
+    if (!group) {
+      group = { category: faq.category, items: [] };
+      groups.push(group);
+    }
+    group.items.push(faq);
+  }
+  return groups;
+}
 
 export default function FAQ() {
+  const [faqs, setFaqs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const data = await getFaqsRequest();
+        setFaqs(data.faqs);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
+
+  const groups = groupFaqs(faqs);
+
   return (
     <main className="bg-slate-950">
       {/* Hero */}
@@ -121,9 +87,16 @@ export default function FAQ() {
       {/* FAQ groups */}
       <section className="relative px-6 py-20 sm:py-24">
         <div className="mx-auto max-w-3xl space-y-14">
-          {FAQ_GROUPS.map((group, gi) => (
-            <FAQGroup key={group.category} group={group} index={gi} />
-          ))}
+          {error && (
+            <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-center text-sm text-red-400">
+              {error}
+            </p>
+          )}
+          {loading ? (
+            <p className="text-center text-sm text-slate-400">Loading FAQs...</p>
+          ) : (
+            groups.map((group, gi) => <FAQGroup key={group.category} group={group} index={gi} />)
+          )}
         </div>
       </section>
 
@@ -151,7 +124,7 @@ function FAQGroup({ group, index }) {
       <h2 className="text-xl font-semibold text-white">{group.category}</h2>
       <div className="mt-5 flex flex-col gap-3">
         {group.items.map((item) => (
-          <FAQItem key={item.question} {...item} />
+          <FAQItem key={item._id} question={item.question} answer={item.answer} />
         ))}
       </div>
     </div>

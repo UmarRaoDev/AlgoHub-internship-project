@@ -66,8 +66,7 @@ export default function AdminUsers() {
   }, [users, search]);
 
   return (
-    <main className="bg-slate-950 px-6 py-20 sm:py-28">
-      <div className="mx-auto max-w-4xl">
+    <div className="mx-auto max-w-4xl">
         <div className="text-center">
           <p className="text-xs font-semibold uppercase tracking-wider text-blue-500">
             {isAdmin ? "Admin" : "Editor"}
@@ -169,6 +168,5 @@ export default function AdminUsers() {
           )}
         </div>
       </div>
-    </main>
   );
 }
